@@ -100,7 +100,7 @@ public class orderBookController {
 
 		List<OrderBook> orderBooks = orderBookService.getAllOrderBooks();
 		modelAndView.addObject("orderBooks", orderBooks);
-		modelAndView.addObject("adminMessage", "Page - Order Book");
+		modelAndView.addObject("adminMessage", "Orders Inventory");
 		return modelAndView;
 	}
 
@@ -126,7 +126,7 @@ public class orderBookController {
 		modelAndView.addObject("orderBook", orderBook);
 		modelAndView.addObject("instrumentMap", instrumentService.getAllInstrumentMap());
 		modelAndView.addObject("bookStatusMap", bookStatusService.getBookStatusMap());
-		modelAndView.addObject("adminMessage", "Modify - Order Book");
+		modelAndView.addObject("adminMessage", "Modify  - Order Book");
 		modelAndView.addObject("userName",
 				"Welcome : " +userService.getUserName());
 		modelAndView.setViewName("admin/editorderbook");
@@ -155,7 +155,7 @@ public class orderBookController {
 		List<Order> orphanOrders = orderBookService.getOrphanOrders(orderBook);
 		modelAndView.addObject("orderBook", orderBook);
 		modelAndView.addObject("orphanOrders", orphanOrders);
-		modelAndView.addObject("adminMessage", "Accpt Orders for Order Book");
+		modelAndView.addObject("adminMessage", "Order Book - Accept Orders");
 		modelAndView.addObject("userName",
 				"Welcome : " + userService.getUserName());
 		modelAndView.setViewName("admin/accptOrders");
@@ -175,7 +175,7 @@ public class orderBookController {
 		List<Order> orphanOrders = orderBookService.getOrphanOrders(orderBook);
 		modelAndView.addObject("orderBook", orderBook);
 		modelAndView.addObject("orphanOrders", orphanOrders);
-		modelAndView.addObject("adminMessage", "Accpt Orders for Order Book");
+		modelAndView.addObject("adminMessage", "Order Book - Accept Orders");
 		modelAndView.addObject("userName",
 				"Welcome : " + userService.getUserName());
 		modelAndView.setViewName("admin/accptOrders");
@@ -190,7 +190,7 @@ public class orderBookController {
 		modelAndView.addObject("orderBook", orderBook);
 		modelAndView.addObject("instrumentMap", instrumentService.getAllInstrumentMap());
 		modelAndView.addObject("bookStatusMap", bookStatusService.getBookStatusMap());
-		modelAndView.addObject("adminMessage", "Create Order Book");
+		modelAndView.addObject("adminMessage", "Create - Order Book");
 		modelAndView.addObject("userName",
 				"Welcome : " + userService.getUserName());
 		modelAndView.setViewName("admin/editorderbook");
@@ -204,6 +204,7 @@ public class orderBookController {
 		Execution execution = executionService.getTempExecutionForOrder(orderBook);
 		modelAndView.addObject("orderBook", orderBook);
 		modelAndView.addObject("execution", execution);
+		modelAndView.addObject("adminMessage", "Order Book - Add Execution");
 		modelAndView.setViewName("admin/addExecution");
 		return modelAndView;
 	}
@@ -228,6 +229,7 @@ public class orderBookController {
 		OrderBookStatsVo orderBookStatsVo=orderBookService.getOrderBookStats(orderBookId);
 		modelAndView.addObject("orderBookStatsVo", orderBookStatsVo);
 		modelAndView.addObject("orderBook", orderBookStatsVo.getOrderBook());
+		modelAndView.addObject("adminMessage", "Order Book - Statistics");
 		modelAndView.setViewName("admin/orderBookStats");
 		return modelAndView;
 	}

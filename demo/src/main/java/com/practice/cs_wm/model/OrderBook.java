@@ -3,6 +3,7 @@ package com.practice.cs_wm.model;
 import java.util.Date;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -41,11 +42,11 @@ public class OrderBook {
 	@JoinColumn(name = "order_book_status_id", nullable = false)
 	private OrderBookStatus orderBookStatus;
 	
-	@OneToMany(fetch = FetchType.EAGER, mappedBy = "orderBook")
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "orderBook", cascade=CascadeType.ALL)
 	@JsonManagedReference
 	private Set<Execution> executions;
 	
-	@OneToMany(fetch = FetchType.EAGER,mappedBy = "orderBook")
+	@OneToMany(fetch = FetchType.EAGER,mappedBy = "orderBook",cascade=CascadeType.ALL)
 	@JsonManagedReference
 	private Set<Order> orders;
 	

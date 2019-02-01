@@ -86,7 +86,7 @@ public class OrderConteoller {
 		List<Order> allOrders = getOrders();
 		ModelAndView modelAndView = new ModelAndView();
 		modelAndView.addObject("allOrders", allOrders);
-		modelAndView.addObject("adminMessage", "Page - Order Book");
+		modelAndView.addObject("adminMessage", "Orders Inventory");
 		modelAndView.addObject("userName",
 				"Welcome : " + userService.getUserName());
 		modelAndView.setViewName("admin/myOrders");
@@ -95,10 +95,16 @@ public class OrderConteoller {
 	
 	
 	@RequestMapping(value="/orderDelete/{orderId}",method = RequestMethod.GET)    
-    public String delete(@PathVariable long orderId){    
-		Order order = orderService.getOrder(orderId);
+    public ModelAndView delete(@PathVariable long orderId){    
 		orderService.removeOrder(orderId);    
-        return "redirect:/orderBookEdit/" + order.getOrderBook().getOrderBookId();    
+		List<Order> allOrders = getOrders();
+		ModelAndView modelAndView = new ModelAndView();
+		modelAndView.addObject("allOrders", allOrders);
+		modelAndView.addObject("adminMessage", "Orders Inventory");
+		modelAndView.addObject("userName",
+				"Welcome : " + userService.getUserName());
+		modelAndView.setViewName("admin/myOrders");
+        return modelAndView;      
     }  
 	
 	@RequestMapping(value="/orderEdit/{orderId}",method = RequestMethod.GET)    
@@ -108,7 +114,7 @@ public class OrderConteoller {
 		modelAndView.addObject("order", order);
 		modelAndView.addObject("instrumentMap", instrumentService.getAllInstrumentMap());
 		modelAndView.addObject("orderTypeMap", orderTypeService.getAllModelTypes());
-		modelAndView.addObject("adminMessage", "Page - Order Book");
+		modelAndView.addObject("adminMessage", "Modify - Order");
 		modelAndView.addObject("userName",
 				"Welcome : " + userService.getUserName());
 		modelAndView.setViewName("admin/editorder");
@@ -122,7 +128,7 @@ public class OrderConteoller {
 		modelAndView.addObject("order", order);
 		modelAndView.addObject("instrumentMap", instrumentService.getAllInstrumentMap());
 		modelAndView.addObject("orderTypeMap", orderTypeService.getAllModelTypes());
-		modelAndView.addObject("adminMessage", "Page - Order Book");
+		modelAndView.addObject("adminMessage", "Create - Order ");
 		modelAndView.addObject("userName",
 				"Welcome : " + userService.getUserName());
 		modelAndView.setViewName("admin/editorder");

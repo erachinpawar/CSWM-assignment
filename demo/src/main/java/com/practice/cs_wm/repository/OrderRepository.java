@@ -6,6 +6,7 @@ import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.practice.cs_wm.model.Instrument;
 import com.practice.cs_wm.model.Order;
@@ -15,10 +16,10 @@ import com.practice.cs_wm.model.OrderType;
 public interface OrderRepository  extends JpaRepository<Order, Long>{
 
 	@Query("select c from Order c where c.orderBook = :orderBook AND (c.orderType = :marketOrderType OR (c.orderType = :limitOrderType and c.orderprice < :price))")
-	List<Order> getValidOrders(OrderBook orderBook, long price, OrderType limitOrderType, OrderType marketOrderType);
+	List<Order> getValidOrders(@Param("orderBook") OrderBook orderBook,@Param("price") long price,@Param("limitOrderType") OrderType limitOrderType,@Param("marketOrderType") OrderType marketOrderType);
 
 	@Query("select sum(c.executionQuantity) from Order c where c.instrument =:instrument")
-	int getExecQtyForINstr(Instrument instrument);
+	int getExecQtyForINstr(@Param("instrument") Instrument instrument);
 
 	Set<Order> findAllByOrderBook(OrderBook orderBook);
 
@@ -39,7 +40,7 @@ public interface OrderRepository  extends JpaRepository<Order, Long>{
 
 	@Modifying
 	@Query(value ="update orders_INV set order_book_id = null where order_id=:orderId", nativeQuery = true)
-	void removeOrderfromBook(long orderId);
+	void removeOrderfromBook(@Param("orderId") long orderId);
 
 
 

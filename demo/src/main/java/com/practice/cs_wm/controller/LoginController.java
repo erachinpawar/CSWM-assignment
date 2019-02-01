@@ -60,7 +60,7 @@ public class LoginController {
     public ModelAndView home(){
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.addObject("userName", "Welcome " + userService.getUserName());
-        modelAndView.addObject("adminMessage", "Wel-Come to Home Page");
+        modelAndView.addObject("adminMessage", "Wel-Come to Orders Management System");
         modelAndView.setViewName("admin/home");
         return modelAndView;
     }

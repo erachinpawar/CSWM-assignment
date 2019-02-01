@@ -17,7 +17,6 @@
 <script
 	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </head>
-<title>Order Book Statistics</title>
 </head>
 <body>
 	<div class="container">
@@ -32,8 +31,8 @@
 				<div class="menu-navigation">
 					<ul>
 						<li><a href="/admin/home">Home</a></li>
-						<li><a href="/admin/myorderbook">My Order Book</a></li>
-						<li><a href="/admin/myOrders">Orders</a></li>
+						<li><a href="/admin/myorderbook">Order Book Inventory</a></li>
+						<li><a href="/admin/myOrders">Order Inventory</a></li>
 						<li><a href="/admin/AboutMe">About Me</a></li>
 					</ul>
 				</div>
@@ -41,7 +40,6 @@
 			</div>
 			<br><br>
 			<p class="admin-message-text text-center" th:utext="${adminMessage}"></p>
-			<h1>Order Book Statistics </h1>
 
 			<form action="#" th:action="@{/saveOrderBook}"
 				th:object="${orderBook}" method="post">
