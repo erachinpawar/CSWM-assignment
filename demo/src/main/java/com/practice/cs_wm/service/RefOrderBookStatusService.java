@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import com.practice.cs_wm.model.OrderBookStatus;
 
 @Service
-public interface RefOrderBookStatusService {
+public interface RefOrderBookStatusService  extends AbstractService {
 
 	void removeOrderBookStatus(long refOrderBookStatusId);
 

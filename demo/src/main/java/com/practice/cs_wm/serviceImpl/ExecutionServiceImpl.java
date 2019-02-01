@@ -22,8 +22,9 @@ public class ExecutionServiceImpl implements ExecutionService {
 	@Autowired
 	ExecutionRepository executionRepository;
 	
+	
 	@Autowired
-	private UserService userService;
+	ServiceFactory serviceFactory;
 
 	@Override
 	public Execution getExecution() {
@@ -50,7 +51,10 @@ public class ExecutionServiceImpl implements ExecutionService {
 			execution.setPrice(ordBookExec.getPrice());
 			execution.setExecutionName(ordBookExec.getExecutionName());
 		}
-		execution.setCreatedBy(userService.getUserName());
+		else {
+			execution.setExecutionName("");
+		}
+		execution.setCreatedBy(((UserService) serviceFactory.getService(ApplicationConstants.USER_SERVICE)).getUserName());
 		execution.setCreatedOn(new Date());
 		execution.setOrderBook(orderBook);
 		return execution;

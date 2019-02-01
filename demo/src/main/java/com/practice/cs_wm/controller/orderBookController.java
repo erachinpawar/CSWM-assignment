@@ -35,6 +35,7 @@ import com.practice.cs_wm.service.InstrumentService;
 import com.practice.cs_wm.service.OrderBookService;
 import com.practice.cs_wm.service.RefOrderBookStatusService;
 import com.practice.cs_wm.service.UserService;
+import com.practice.cs_wm.serviceImpl.ServiceFactory;
 
 @Controller
 @Path("/orderBooks")
@@ -42,51 +43,38 @@ import com.practice.cs_wm.service.UserService;
 @Produces(MediaType.APPLICATION_JSON)
 
 public class orderBookController {
-//	@Autowired
-//	private UserService userService;
 
-	@Autowired
-	private OrderBookService orderBookService;
-
-	@Autowired
-	private RefOrderBookStatusService bookStatusService ;
 	
 	@Autowired
-	private InstrumentService instrumentService;
-	
-	@Autowired
-	private ExecutionService executionService;
-
-	@Autowired
-	private UserService userService;
-	
+	ServiceFactory serviceFactory;
 
 	@GET
 	public List<OrderBook> getOrderBooks() {
-		return orderBookService.getAllOrderBooks();
+		return ((OrderBookService) serviceFactory.getService(ApplicationConstants.ORDER_BOOK_SERVICE))
+				.getAllOrderBooks();
 	}
 
 	@POST
 	public OrderBook addOrderBook(OrderBook orderBook, @Context UriInfo uriInfo) {
-		return orderBookService.addOrderBook(orderBook);
+		return ((OrderBookService) serviceFactory.getService(ApplicationConstants.ORDER_BOOK_SERVICE)).addOrderBook(orderBook);
 	}
 
 	@PUT
 	@Path("/{orderBookId}")
 	public OrderBook updateOrderBook(@PathParam("orderBookId") long orderBookid, OrderBook orderBook) {
-		return orderBookService.updateOrderBook(orderBook);
+		return ((OrderBookService) serviceFactory.getService(ApplicationConstants.ORDER_BOOK_SERVICE)).updateOrderBook(orderBook);
 	}
 
 	@DELETE
 	@Path("/{orderBookId}")
 	public void deleteOrderBook(@PathParam("orderBookId") long orderBookId) {
-		orderBookService.removeOrderBook(orderBookId);
+		((OrderBookService) serviceFactory.getService(ApplicationConstants.ORDER_BOOK_SERVICE)).removeOrderBook(orderBookId);
 	}
 
 	@GET
 	@Path("/{orderBookId}")
 	public OrderBook getOrderBook(@PathParam("orderBookId") long orderBookid, @Context UriInfo uriInfo) {
-		OrderBook orderBook = orderBookService.getOrderBook(orderBookid);
+		OrderBook orderBook = ((OrderBookService) serviceFactory.getService(ApplicationConstants.ORDER_BOOK_SERVICE)).getOrderBook(orderBookid);
 		return orderBook;
 
 	}
@@ -95,10 +83,9 @@ public class orderBookController {
 	public ModelAndView login() {
 		ModelAndView modelAndView = new ModelAndView();
 		modelAndView.setViewName("admin/myorderbook");
-		modelAndView.addObject("userName",
-				"Welcome " +userService.getUserName());
+		modelAndView.addObject("userName", "Welcome " + ((UserService) serviceFactory.getService(ApplicationConstants.USER_SERVICE)).getUserName());
 
-		List<OrderBook> orderBooks = orderBookService.getAllOrderBooks();
+		List<OrderBook> orderBooks = ((OrderBookService) serviceFactory.getService(ApplicationConstants.ORDER_BOOK_SERVICE)).getAllOrderBooks();
 		modelAndView.addObject("orderBooks", orderBooks);
 		modelAndView.addObject("adminMessage", "Orders Inventory");
 		return modelAndView;
@@ -106,102 +93,97 @@ public class orderBookController {
 
 	@RequestMapping(value = "/orderBookDelete/{orderBookId}", method = RequestMethod.GET)
 	public String delete(@PathVariable long orderBookId) {
-		orderBookService.removeOrderBook(orderBookId);
+		((OrderBookService) serviceFactory.getService(ApplicationConstants.ORDER_BOOK_SERVICE)).removeOrderBook(orderBookId);
 		return "redirect:/admin/myorderbook";
 	}
 
-	@ExceptionHandler({DataNotFoundException.class})
+	@ExceptionHandler({ DataNotFoundException.class })
 	@RequestMapping(value = "/saveOrderBook", method = RequestMethod.POST)
 	public String saveOrderBook(OrderBook orderBook, BindingResult bindingResult) {
-		orderBook.setCreatedBy(userService.getUserName());
+		orderBook.setCreatedBy(((UserService) serviceFactory.getService(ApplicationConstants.USER_SERVICE)).getUserName());
 		orderBook.setCreatedOn(new Date());
-		orderBookService.addOrderBook(orderBook);
+		((OrderBookService) serviceFactory.getService(ApplicationConstants.ORDER_BOOK_SERVICE)).addOrderBook(orderBook);
 		return "redirect:/admin/myorderbook";
 	}
 
 	@RequestMapping(value = "/orderBookEdit/{orderBookId}", method = RequestMethod.GET)
 	public ModelAndView getOrderBook(@PathVariable long orderBookId) {
 		ModelAndView modelAndView = new ModelAndView();
-		OrderBook orderBook = orderBookService.getOrderBook(orderBookId);
+		OrderBook orderBook = ((OrderBookService) serviceFactory.getService(ApplicationConstants.ORDER_BOOK_SERVICE)).getOrderBook(orderBookId);
 		modelAndView.addObject("orderBook", orderBook);
-		modelAndView.addObject("instrumentMap", instrumentService.getAllInstrumentMap());
-		modelAndView.addObject("bookStatusMap", bookStatusService.getBookStatusMap());
+		modelAndView.addObject("instrumentMap", ((InstrumentService) serviceFactory.getService(ApplicationConstants.INSTRUMENT_SERVICE)).getAllInstrumentMap());
+		modelAndView.addObject("bookStatusMap", ((RefOrderBookStatusService) serviceFactory.getService(ApplicationConstants.REF_ORDER_BOOK_STATUS_SERVICE)).getBookStatusMap());
 		modelAndView.addObject("adminMessage", "Modify  - Order Book");
-		modelAndView.addObject("userName",
-				"Welcome : " +userService.getUserName());
+		modelAndView.addObject("userName", "Welcome : " + ((UserService) serviceFactory.getService(ApplicationConstants.USER_SERVICE)).getUserName());
 		modelAndView.setViewName("admin/editorderbook");
 		return modelAndView;
 	}
-	
+
 	@RequestMapping(value = "/orderBooks/{orderBookId}/acceptOrders", method = RequestMethod.GET)
 	public ModelAndView getOrderBookAcceptOrders(@PathVariable long orderBookId) {
 		ModelAndView modelAndView = new ModelAndView();
-		OrderBook orderBook = orderBookService.getOrderBook(orderBookId);
-		List<Order> orphanOrders = orderBookService.getOrphanOrders(orderBook);
+		OrderBook orderBook = ((OrderBookService) serviceFactory.getService(ApplicationConstants.ORDER_BOOK_SERVICE)).getOrderBook(orderBookId);
+		List<Order> orphanOrders = ((OrderBookService) serviceFactory.getService(ApplicationConstants.ORDER_BOOK_SERVICE)).getOrphanOrders(orderBook);
 		modelAndView.addObject("orderBook", orderBook);
 		modelAndView.addObject("orphanOrders", orphanOrders);
 		modelAndView.addObject("adminMessage", "Order Book - Accept Orders");
-		modelAndView.addObject("userName",
-				"Welcome :" + userService.getUserName());
+		modelAndView.addObject("userName", "Welcome :" + ((UserService) serviceFactory.getService(ApplicationConstants.USER_SERVICE)).getUserName());
 		modelAndView.setViewName("admin/accptOrders");
 		return modelAndView;
 	}
-	
+
 	@RequestMapping(value = "/orderBooks/{orderBookId}/close", method = RequestMethod.GET)
 	public ModelAndView closeOrderBook(@PathParam("orderBookId") long orderBookId) {
 		ModelAndView modelAndView = new ModelAndView();
-		 orderBookService.openCloseOrderBook(orderBookId,ApplicationConstants.ORDER_BOOK_STATUS_CLOSE);
-		OrderBook orderBook = orderBookService.getOrderBook(orderBookId);
-		List<Order> orphanOrders = orderBookService.getOrphanOrders(orderBook);
+		((OrderBookService) serviceFactory.getService(ApplicationConstants.ORDER_BOOK_SERVICE)).openCloseOrderBook(orderBookId, ApplicationConstants.ORDER_BOOK_STATUS_CLOSE);
+		OrderBook orderBook = ((OrderBookService) serviceFactory.getService(ApplicationConstants.ORDER_BOOK_SERVICE)).getOrderBook(orderBookId);
+		List<Order> orphanOrders = ((OrderBookService) serviceFactory.getService(ApplicationConstants.ORDER_BOOK_SERVICE)).getOrphanOrders(orderBook);
 		modelAndView.addObject("orderBook", orderBook);
 		modelAndView.addObject("orphanOrders", orphanOrders);
 		modelAndView.addObject("adminMessage", "Order Book - Accept Orders");
-		modelAndView.addObject("userName",
-				"Welcome : " + userService.getUserName());
+		modelAndView.addObject("userName", "Welcome : " + ((UserService) serviceFactory.getService(ApplicationConstants.USER_SERVICE)).getUserName());
 		modelAndView.setViewName("admin/accptOrders");
 		return modelAndView;
-		
+
 	}
-	
+
 	@RequestMapping(value = "/orderBooks/{orderBookId}/open")
 	public OrderBook openOrderBook(@PathParam("orderBookId") long orderBookId, OrderBook orderBook) {
-		return orderBookService.openCloseOrderBook(orderBookId,ApplicationConstants.ORDER_BOOK_STATUS_OPEN);
+		return ((OrderBookService) serviceFactory.getService(ApplicationConstants.ORDER_BOOK_SERVICE)).openCloseOrderBook(orderBookId, ApplicationConstants.ORDER_BOOK_STATUS_OPEN);
 	}
-	
+
 	@RequestMapping(value = "/orderBooks/{orderBookId}/acceptOrder/{orderId}", method = RequestMethod.GET)
-	public ModelAndView acceptOrderForBook(@PathVariable long orderBookId,@PathVariable long orderId) {
+	public ModelAndView acceptOrderForBook(@PathVariable long orderBookId, @PathVariable long orderId) {
 		ModelAndView modelAndView = new ModelAndView();
-		OrderBook orderBook = orderBookService.acceptOrderForOrderBook(orderBookId,orderId);
-		List<Order> orphanOrders = orderBookService.getOrphanOrders(orderBook);
+		OrderBook orderBook = ((OrderBookService) serviceFactory.getService(ApplicationConstants.ORDER_BOOK_SERVICE)).acceptOrderForOrderBook(orderBookId, orderId);
+		List<Order> orphanOrders = ((OrderBookService) serviceFactory.getService(ApplicationConstants.ORDER_BOOK_SERVICE)).getOrphanOrders(orderBook);
 		modelAndView.addObject("orderBook", orderBook);
 		modelAndView.addObject("orphanOrders", orphanOrders);
 		modelAndView.addObject("adminMessage", "Order Book - Accept Orders");
-		modelAndView.addObject("userName",
-				"Welcome : " + userService.getUserName());
+		modelAndView.addObject("userName", "Welcome : " + ((UserService) serviceFactory.getService(ApplicationConstants.USER_SERVICE)).getUserName());
 		modelAndView.setViewName("admin/accptOrders");
 		return modelAndView;
 	}
-	
+
 	@RequestMapping(value = "/createOrderBook", method = RequestMethod.GET)
 	public ModelAndView getCreateOrderBook() {
 		ModelAndView modelAndView = new ModelAndView();
-		OrderBook orderBook = orderBookService.createDefaultOrderBook();
-		//orderBook=orderBookService.addOrderBook(orderBook);
+		OrderBook orderBook = ((OrderBookService) serviceFactory.getService(ApplicationConstants.ORDER_BOOK_SERVICE)).createDefaultOrderBook();
+		// orderBook=((OrderBookService) serviceFactory.getService(ApplicationConstants.ORDER_BOOK_SERVICE)).addOrderBook(orderBook);
 		modelAndView.addObject("orderBook", orderBook);
-		modelAndView.addObject("instrumentMap", instrumentService.getAllInstrumentMap());
-		modelAndView.addObject("bookStatusMap", bookStatusService.getBookStatusMap());
+		modelAndView.addObject("instrumentMap", ((InstrumentService) serviceFactory.getService(ApplicationConstants.INSTRUMENT_SERVICE)).getAllInstrumentMap());
+		modelAndView.addObject("bookStatusMap", ((RefOrderBookStatusService) serviceFactory.getService(ApplicationConstants.REF_ORDER_BOOK_STATUS_SERVICE)).getBookStatusMap());
 		modelAndView.addObject("adminMessage", "Create - Order Book");
-		modelAndView.addObject("userName",
-				"Welcome : " + userService.getUserName());
+		modelAndView.addObject("userName", "Welcome : " + ((UserService) serviceFactory.getService(ApplicationConstants.USER_SERVICE)).getUserName());
 		modelAndView.setViewName("admin/editorderbook");
 		return modelAndView;
 	}
-	
+
 	@RequestMapping(value = "/orderBooks/{orderBookId}/addExecutionToOrderBook", method = RequestMethod.GET)
 	public ModelAndView addExecution(@PathVariable long orderBookId) {
 		ModelAndView modelAndView = new ModelAndView();
-		OrderBook orderBook = orderBookService.getOrderBook(orderBookId);
-		Execution execution = executionService.getTempExecutionForOrder(orderBook);
+		OrderBook orderBook = ((OrderBookService) serviceFactory.getService(ApplicationConstants.ORDER_BOOK_SERVICE)).getOrderBook(orderBookId);
+		Execution execution = ((ExecutionService) serviceFactory.getService(ApplicationConstants.EXECUTION_SERVICE)).getTempExecutionForOrder(orderBook);
 		modelAndView.addObject("orderBook", orderBook);
 		modelAndView.addObject("execution", execution);
 		modelAndView.addObject("adminMessage", "Order Book - Add Execution");
@@ -211,27 +193,26 @@ public class orderBookController {
 
 	@RequestMapping(value = "/addExecution", method = RequestMethod.POST)
 	public String addExecution(Execution execution) {
-		orderBookService.addExecution(execution);
-		return "redirect:/orderBookEdit/"+execution.getOrderBook().getOrderBookId();
+		((OrderBookService) serviceFactory.getService(ApplicationConstants.ORDER_BOOK_SERVICE)).addExecution(execution);
+		return "redirect:/orderBookEdit/" + execution.getOrderBook().getOrderBookId();
 	}
-	
 
 	@RequestMapping(value = "/orderBookEdit/{orderBookId}/orderEdit/{OrderId}", method = RequestMethod.GET)
 	public String EditOrderBookOrder(@PathVariable long orderBookId, @PathVariable long OrderId) {
 		{
-			return "redirect:/orderEdit/" +OrderId;
+			return "redirect:/orderEdit/" + OrderId;
 		}
 	}
-	
+
 	@RequestMapping(value = "/orderBooks/{orderBookId}/getBookStats", method = RequestMethod.GET)
 	public ModelAndView getOrderBookStats(@PathVariable long orderBookId) {
 		ModelAndView modelAndView = new ModelAndView();
-		OrderBookStatsVo orderBookStatsVo=orderBookService.getOrderBookStats(orderBookId);
+		OrderBookStatsVo orderBookStatsVo = ((OrderBookService) serviceFactory.getService(ApplicationConstants.ORDER_BOOK_SERVICE)).getOrderBookStats(orderBookId);
 		modelAndView.addObject("orderBookStatsVo", orderBookStatsVo);
 		modelAndView.addObject("orderBook", orderBookStatsVo.getOrderBook());
 		modelAndView.addObject("adminMessage", "Order Book - Statistics");
 		modelAndView.setViewName("admin/orderBookStats");
 		return modelAndView;
 	}
-	
+
 }

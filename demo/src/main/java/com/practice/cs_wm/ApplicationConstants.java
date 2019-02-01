@@ -31,5 +31,16 @@ public class ApplicationConstants {
 	public static final String ORDER_STATUS_INVALID = "In-Valid";
 	
 	public static final String ORDER_STATUS_NOT_SET = "Not Yet Set";
+	
+	public static final String ORDER_BOOK_SERVICE = "ORDER_BOOK_SERVICE";
+	public static final String ORDER_SERVICE = "ORDER_SERVICE";
+	public static final String USER_SERVICE = "USER_SERVICE";
+	public static final String INSTRUMENT_SERVICE = "INSTRUMENT_SERVICE";
+	public static final String EXECUTION_SERVICE = "EXECUTION_SERVICE";
+	public static final String REF_ORDER_BOOK_STATUS_SERVICE = "REF_ORDER_BOOK_STATUS_SERVICE";
+	public static final String REF_ORDER_STATUS_SERVICE = "REF_ORDER_STATUS_SERVICE";
+	
+	public static final String REF_ORDER_TYPE_SERVICE = "REF_ORDER_TYPE_SERVICE";
+	
 
 }

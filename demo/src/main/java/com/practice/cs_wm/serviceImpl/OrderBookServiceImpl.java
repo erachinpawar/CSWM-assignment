@@ -34,19 +34,10 @@ public class OrderBookServiceImpl implements OrderBookService {
 	@Autowired
 	OrderBookRepository orderBookRepository;
 
-	@Autowired
-	RefOrderBookStatusService refOrderBookStatusService;
 
 	@Autowired
-	OrderService orderService;
+	ServiceFactory serviceFactory;
 
-	@Autowired
-	ExecutionService executionService;
-	
-	@Autowired
-	InstrumentService instrumentService;
-	@Autowired
-	private UserService userService;
 
 	@Override
 	public List<OrderBook> getAllOrderBooks() {
@@ -56,9 +47,9 @@ public class OrderBookServiceImpl implements OrderBookService {
 	@Override
 	public OrderBook addOrderBook(OrderBook orderBook) {
 		validate(orderBook);
-		orderBook.setOrderBookStatus(refOrderBookStatusService.getOrderBookStatus(orderBook.getOrderBookStatus().getOrderBookStatusId()));
+		orderBook.setOrderBookStatus(((RefOrderBookStatusService) serviceFactory.getService(ApplicationConstants.REF_ORDER_BOOK_STATUS_SERVICE)).getOrderBookStatus(orderBook.getOrderBookStatus().getOrderBookStatusId()));
 		if(null!=orderBook.getInstrument())
-		orderBook.setInstrument(instrumentService.getInstrument(orderBook.getInstrument().getRefInstrumentId()));
+		orderBook.setInstrument(((InstrumentService) serviceFactory.getService(ApplicationConstants.INSTRUMENT_SERVICE)).getInstrument(orderBook.getInstrument().getRefInstrumentId()));
 		if(null==orderBook.getExecutionStatus())
 			orderBook.setBookExecutionStatus(ApplicationConstants.BOOK_EXECUTED_NO);
 			orderBookRepository.save(orderBook);
@@ -89,7 +80,7 @@ public class OrderBookServiceImpl implements OrderBookService {
 	@Override
 	public OrderBook openCloseOrderBook(long orderBookId, long orderBookStatus) {
 		OrderBook orderBook = getOrderBook(orderBookId);
-		orderBook.setOrderBookStatus(refOrderBookStatusService.getOrderBookStatus(orderBookStatus));
+		orderBook.setOrderBookStatus(((RefOrderBookStatusService) serviceFactory.getService(ApplicationConstants.REF_ORDER_BOOK_STATUS_SERVICE)).getOrderBookStatus(orderBookStatus));
 		orderBookRepository.save(orderBook);
 		return orderBook;
 	}
@@ -99,8 +90,10 @@ public class OrderBookServiceImpl implements OrderBookService {
 	private boolean isOrderBookEligibleForExec(OrderBook orderBook, Execution execution) {
 		if (ApplicationConstants.BOOK_EXECUTED_YES.equalsIgnoreCase(orderBook.getBookExecutionStatus()))
 			return false;
+		
+		OrderService orderService = ((OrderService) serviceFactory.getService(ApplicationConstants.ORDER_SERVICE));
 
-		List<Order> validOrders = orderService.getValidOrders(orderBook);
+		List<Order> validOrders = ((OrderService) serviceFactory.getService(ApplicationConstants.ORDER_SERVICE)).getValidOrders(orderBook);
 		
 		int accumltdOrders = orderService.getAccOrdersFromValidOrders(validOrders);
 		double accExecQty=orderService.getTotExecQtyValidOrders(validOrders);
@@ -144,7 +137,7 @@ public class OrderBookServiceImpl implements OrderBookService {
 		else {
 			if (isOrderBookEligibleForExec(orderBook,execution)) {
 				execution.setOrderBook(orderBook);
-				executionService.addExecution(execution);
+				((ExecutionService) serviceFactory.getService(ApplicationConstants.EXECUTION_SERVICE)).addExecution(execution);
 			}
 			else
 			{
@@ -159,6 +152,7 @@ public class OrderBookServiceImpl implements OrderBookService {
 	@Override
 	public OrderBookStatsVo getOrderBookStats(long orderBookId) {
 		OrderBook orderBook =getOrderBook(orderBookId);
+		OrderService orderService = ((OrderService) serviceFactory.getService(ApplicationConstants.ORDER_SERVICE));
 		List<Order> validOrders =orderService.getValidOrders(orderBook);
 		List<Order> bookOrders= new ArrayList<>(orderService.getOrdersForBook(orderBook));
 		List<Order> invalidOrders = new ArrayList<>(bookOrders);
@@ -183,6 +177,7 @@ public class OrderBookServiceImpl implements OrderBookService {
 
 	private Map<String, Order> getStatsMapforOrderBook(OrderBook orderBook) {
 		Map<String, Order> orderStats = new HashMap<>();
+		OrderService orderService = ((OrderService) serviceFactory.getService(ApplicationConstants.ORDER_SERVICE));
 		orderStats.put(ApplicationConstants.BIGGEST_ORDER,orderService.getBiggestOrderForBook(orderBook));
 		orderStats.put(ApplicationConstants.SMALLEST_ORDER,orderService.getSmallestOrderForBook(orderBook));
 		orderStats.put(ApplicationConstants.EARLIEST_ORDER,orderService.getEarliestOrderInBook(orderBook));
@@ -194,20 +189,22 @@ public class OrderBookServiceImpl implements OrderBookService {
 	@Override
 	public OrderBook createDefaultOrderBook() {
 		OrderBook orderBook=new OrderBook();
-		orderBook.setCreatedBy(userService.getUserName());
+		orderBook.setCreatedBy(((UserService) serviceFactory.getService(ApplicationConstants.USER_SERVICE)).getUserName());
 		orderBook.setCreatedOn(new Date());
 		orderBook.setBookExecutionStatus("N");
-		orderBook.setOrderBookStatus(refOrderBookStatusService.getOrderBookStatus(ApplicationConstants.ORDER_BOOK_STATUS_OPEN));
+		orderBook.setOrderBookStatus(((RefOrderBookStatusService) serviceFactory.getService(ApplicationConstants.REF_ORDER_BOOK_STATUS_SERVICE)).getOrderBookStatus(ApplicationConstants.ORDER_BOOK_STATUS_OPEN));
 		return orderBook;
 	}
 
 	@Override
 	public List<Order> getOrphanOrders(OrderBook orderBook) {
+		OrderService orderService = ((OrderService) serviceFactory.getService(ApplicationConstants.ORDER_SERVICE));
 		return orderService.getOrphanOrders(orderBook.getInstrument());
 	}
 
 	@Override
 	public OrderBook acceptOrderForOrderBook(long orderBookId, long orderId) {
+		OrderService orderService = ((OrderService) serviceFactory.getService(ApplicationConstants.ORDER_SERVICE));
 		OrderBook orderBook = getOrderBook(orderBookId);
 		orderService.UpdateOrderBookForOrder(orderBook,orderId);
 		return orderBook;

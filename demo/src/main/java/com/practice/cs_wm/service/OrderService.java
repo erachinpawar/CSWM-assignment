@@ -11,7 +11,7 @@ import com.practice.cs_wm.model.OrderBook;
 import com.practice.cs_wm.modelVos.OrderStatsVo;
 
 @Service
-public interface OrderService {
+public interface OrderService  extends AbstractService {
 
 	List<Order> getAllOrders();
 

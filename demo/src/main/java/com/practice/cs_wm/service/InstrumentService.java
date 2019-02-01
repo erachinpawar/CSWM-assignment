@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import com.practice.cs_wm.model.Instrument;
 
 @Service
-public interface InstrumentService {
+public interface InstrumentService  extends AbstractService {
 
 	List<Instrument> getAllInstruments();
 

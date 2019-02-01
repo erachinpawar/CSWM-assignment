@@ -10,7 +10,7 @@ import com.practice.cs_wm.model.OrderBook;
 import com.practice.cs_wm.modelVos.OrderBookStatsVo;
 
 @Service
-public interface OrderBookService {
+public interface OrderBookService  extends AbstractService {
 
 	List<OrderBook> getAllOrderBooks();
 

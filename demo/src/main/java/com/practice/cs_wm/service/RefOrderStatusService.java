@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import com.practice.cs_wm.model.OrderStatus;
 
 @Service
-public interface RefOrderStatusService {
+public interface RefOrderStatusService  extends AbstractService {
 
 
 	List<OrderStatus> getAllOrderStatuses();

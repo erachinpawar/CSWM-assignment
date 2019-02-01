@@ -24,12 +24,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.practice.cs_wm.ApplicationConstants;
 import com.practice.cs_wm.model.Order;
 import com.practice.cs_wm.modelVos.OrderStatsVo;
 import com.practice.cs_wm.service.InstrumentService;
 import com.practice.cs_wm.service.OrderService;
 import com.practice.cs_wm.service.OrderTypeService;
 import com.practice.cs_wm.service.UserService;
+import com.practice.cs_wm.serviceImpl.ServiceFactory;
 
 @Path("/Orders")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -38,24 +40,17 @@ import com.practice.cs_wm.service.UserService;
 public class OrderConteoller {
 	
 	@Autowired
-	OrderService orderService;
-	@Autowired
-	private InstrumentService instrumentService;
-	@Autowired
-	OrderTypeService orderTypeService;
-	
-	@Autowired
-	private UserService userService;
+	ServiceFactory serviceFactory;
 	
 	
 	@GET
 	public List<Order> getOrders() {
-		return orderService.getAllOrders();
+		return ((OrderService) serviceFactory.getService(ApplicationConstants.ORDER_SERVICE)).getAllOrders();
 	}
 	
 	@POST
 	public Order addOrder(Order order, @Context UriInfo uriInfo) {
-		Order newOrder = orderService.addOrder(order);
+		Order newOrder = ((OrderService) serviceFactory.getService(ApplicationConstants.ORDER_SERVICE)).addOrder(order);
 		return newOrder;
 	}
 	
@@ -63,19 +58,19 @@ public class OrderConteoller {
 	@Path("/{orderId}")
 	public Order updateOrder(@PathParam("orderId") long orderid, Order order) {
 		order.setOrderId(orderid);
-		return orderService.updateOrder(order);
+		return ((OrderService) serviceFactory.getService(ApplicationConstants.ORDER_SERVICE)).updateOrder(order);
 	}
 	
 	@DELETE
 	@Path("/{orderId}")
 	public void deleteOrder(@PathParam("orderId") long orderId) {
-		orderService.removeOrder(orderId);
+		((OrderService) serviceFactory.getService(ApplicationConstants.ORDER_SERVICE)).removeOrder(orderId);
 	}
 	
 	@GET
 	@Path("/{orderId}")
 	public Order getOrder(@PathParam("orderId") long orderid, @Context UriInfo uriInfo) {
-		Order order = orderService.getOrder(orderid);
+		Order order = ((OrderService) serviceFactory.getService(ApplicationConstants.ORDER_SERVICE)).getOrder(orderid);
 		return order;
 		
 	}
@@ -88,7 +83,7 @@ public class OrderConteoller {
 		modelAndView.addObject("allOrders", allOrders);
 		modelAndView.addObject("adminMessage", "Orders Inventory");
 		modelAndView.addObject("userName",
-				"Welcome : " + userService.getUserName());
+				"Welcome : " + ((UserService) serviceFactory.getService(ApplicationConstants.USER_SERVICE)).getUserName());
 		modelAndView.setViewName("admin/myOrders");
         return modelAndView;    
     }  
@@ -96,13 +91,13 @@ public class OrderConteoller {
 	
 	@RequestMapping(value="/orderDelete/{orderId}",method = RequestMethod.GET)    
     public ModelAndView delete(@PathVariable long orderId){    
-		orderService.removeOrder(orderId);    
+		((OrderService) serviceFactory.getService(ApplicationConstants.ORDER_SERVICE)).removeOrder(orderId);    
 		List<Order> allOrders = getOrders();
 		ModelAndView modelAndView = new ModelAndView();
 		modelAndView.addObject("allOrders", allOrders);
 		modelAndView.addObject("adminMessage", "Orders Inventory");
 		modelAndView.addObject("userName",
-				"Welcome : " + userService.getUserName());
+				"Welcome : " + ((UserService) serviceFactory.getService(ApplicationConstants.USER_SERVICE)).getUserName());
 		modelAndView.setViewName("admin/myOrders");
         return modelAndView;      
     }  
@@ -110,13 +105,13 @@ public class OrderConteoller {
 	@RequestMapping(value="/orderEdit/{orderId}",method = RequestMethod.GET)    
     public ModelAndView getOrderBook(@PathVariable long orderId){    
 		ModelAndView modelAndView = new ModelAndView();
-		Order order = orderService.getOrder(orderId); 
+		Order order = ((OrderService) serviceFactory.getService(ApplicationConstants.ORDER_SERVICE)).getOrder(orderId); 
 		modelAndView.addObject("order", order);
-		modelAndView.addObject("instrumentMap", instrumentService.getAllInstrumentMap());
-		modelAndView.addObject("orderTypeMap", orderTypeService.getAllModelTypes());
+		modelAndView.addObject("instrumentMap", ((InstrumentService) serviceFactory.getService(ApplicationConstants.INSTRUMENT_SERVICE)).getAllInstrumentMap());
+		modelAndView.addObject("orderTypeMap", ((OrderTypeService) serviceFactory.getService(ApplicationConstants. REF_ORDER_TYPE_SERVICE)).getAllModelTypes());
 		modelAndView.addObject("adminMessage", "Modify - Order");
 		modelAndView.addObject("userName",
-				"Welcome : " + userService.getUserName());
+				"Welcome : " + ((UserService) serviceFactory.getService(ApplicationConstants.USER_SERVICE)).getUserName());
 		modelAndView.setViewName("admin/editorder");
         return modelAndView;    
     } 
@@ -124,35 +119,35 @@ public class OrderConteoller {
 	@RequestMapping(value="/createOrder",method = RequestMethod.GET)    
     public ModelAndView getCreateOrder(){    
 		ModelAndView modelAndView = new ModelAndView();
-		Order order = orderService.createDefaultOrder(); 
+		Order order = ((OrderService) serviceFactory.getService(ApplicationConstants.ORDER_SERVICE)).createDefaultOrder(); 
 		modelAndView.addObject("order", order);
-		modelAndView.addObject("instrumentMap", instrumentService.getAllInstrumentMap());
-		modelAndView.addObject("orderTypeMap", orderTypeService.getAllModelTypes());
+		modelAndView.addObject("instrumentMap", ((InstrumentService) serviceFactory.getService(ApplicationConstants.INSTRUMENT_SERVICE)).getAllInstrumentMap());
+		modelAndView.addObject("orderTypeMap", ((OrderTypeService) serviceFactory.getService(ApplicationConstants. REF_ORDER_TYPE_SERVICE)).getAllModelTypes());
 		modelAndView.addObject("adminMessage", "Create - Order ");
 		modelAndView.addObject("userName",
-				"Welcome : " + userService.getUserName());
+				"Welcome : " + ((UserService) serviceFactory.getService(ApplicationConstants.USER_SERVICE)).getUserName());
 		modelAndView.setViewName("admin/editorder");
         return modelAndView;    
     } 
 	
 	@RequestMapping(value="/saveOrder",method = RequestMethod.POST)    
     public String saveOrderBook(@Valid Order order, BindingResult bindingResult){
-		 order.setCreatedBy(userService.getUserName());
+		 order.setCreatedBy(((UserService) serviceFactory.getService(ApplicationConstants.USER_SERVICE)).getUserName());
 		 order.setCreatedOn(new Date());
-		 orderService.addOrder(order);
+		 ((OrderService) serviceFactory.getService(ApplicationConstants.ORDER_SERVICE)).addOrder(order);
 		 return "redirect:admin/myOrders";
 	}
 	@RequestMapping(value = "/orders/{orderId}/getOrderStats", method = RequestMethod.GET)
 	public ModelAndView getOrderBookStats(@PathVariable long orderId) {
 		ModelAndView modelAndView = new ModelAndView();
-		OrderStatsVo orderStatsVo=orderService.getOrderBookStats(orderId);
-		Order order = orderService.getOrder(orderId);
+		OrderStatsVo orderStatsVo=((OrderService) serviceFactory.getService(ApplicationConstants.ORDER_SERVICE)).getOrderBookStats(orderId);
+		Order order = ((OrderService) serviceFactory.getService(ApplicationConstants.ORDER_SERVICE)).getOrder(orderId);
 		modelAndView.addObject("orderStatsVo", orderStatsVo);
 		modelAndView.addObject("adminMessage", "Order Statistics");
 		modelAndView.addObject("order", order);
 		modelAndView.setViewName("admin/orderStats");
 		modelAndView.addObject("userName",
-				"Welcome : " + userService.getUserName());
+				"Welcome : " + ((UserService) serviceFactory.getService(ApplicationConstants.USER_SERVICE)).getUserName());
 		return modelAndView;
 	}
 

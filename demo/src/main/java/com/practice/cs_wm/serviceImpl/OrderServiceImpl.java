@@ -17,12 +17,10 @@ import com.practice.cs_wm.model.Order;
 import com.practice.cs_wm.model.OrderBook;
 import com.practice.cs_wm.modelVos.OrderStatsVo;
 import com.practice.cs_wm.repository.OrderRepository;
-import com.practice.cs_wm.service.ExecutionService;
 import com.practice.cs_wm.service.InstrumentService;
 import com.practice.cs_wm.service.OrderBookService;
 import com.practice.cs_wm.service.OrderService;
 import com.practice.cs_wm.service.OrderTypeService;
-import com.practice.cs_wm.service.RefOrderStatusService;
 import com.practice.cs_wm.service.UserService;
 
 @Service
@@ -33,22 +31,8 @@ public class OrderServiceImpl implements OrderService {
 	OrderRepository orderRepository;
 
 	@Autowired
-	OrderBookService orderBookService;
-
-	@Autowired
-	ExecutionService executionService;
-
-	@Autowired
-	OrderTypeService orderTypeService;
+	ServiceFactory serviceFactory;
 	
-	@Autowired
-	InstrumentService instrumentService;
-
-	@Autowired
-	private UserService userService;
-	
-	@Autowired
-	RefOrderStatusService orderStatusService;
 	
 	@Override
 	public List<Order> getAllOrders() {
@@ -61,10 +45,10 @@ public class OrderServiceImpl implements OrderService {
 		if (null != order) {
 			if (null != order.getInstrument()) {
 				
-				order.setInstrument(instrumentService.getInstrument(order.getInstrument().getRefInstrumentId()));
+				order.setInstrument(((InstrumentService) serviceFactory.getService(ApplicationConstants.INSTRUMENT_SERVICE)).getInstrument(order.getInstrument().getRefInstrumentId()));
 				if(null!=order.getOrderType())
 				{
-					order.setOrderType(orderTypeService.getOrderTypeById(order.getOrderType().getOrderTypeId()));
+					order.setOrderType(((OrderTypeService) serviceFactory.getService(ApplicationConstants. REF_ORDER_TYPE_SERVICE)).getOrderTypeById(order.getOrderType().getOrderTypeId()));
 					order = modifyOrderAmoutIfLimitOrder(order);
 				}
 				else
@@ -76,6 +60,7 @@ public class OrderServiceImpl implements OrderService {
 			}
 		}
 		order.setExecutionQuantity(0f);
+		// many to one not supporting H2 Db hence made provision with default order
 		if(null==order.getOrderBook())
 		{
 			saveOrderForNullBook(order);
@@ -89,7 +74,7 @@ public class OrderServiceImpl implements OrderService {
 	}
 
 	private void saveOrderForNullBook(Order order) {
-		order.setOrderBook(orderBookService.getOrderBook(ApplicationConstants.DEFAULT_ORDER_BOOK));
+		order.setOrderBook(((OrderBookService) serviceFactory.getService(ApplicationConstants.ORDER_BOOK_SERVICE)).getOrderBook(ApplicationConstants.DEFAULT_ORDER_BOOK));
 		orderRepository.save(order);
 		orderRepository.removeOrderfromBook(order.getOrderId());
 		
@@ -147,8 +132,8 @@ public class OrderServiceImpl implements OrderService {
 		List<Order> validOrders = new ArrayList<Order>();
 		
 		allOrdersForBook.forEach(order -> {
-			if ((order.getOrderprice() < executionPrice && order.getOrderType().equals(orderTypeService.getOrderTypeById(ApplicationConstants.ORDER_TYPE_LIMIT)))
-					|| order.getOrderType().equals(orderTypeService.getOrderTypeById(ApplicationConstants.ORDER_TYPE_MARKET))) {
+			if ((order.getOrderprice() < executionPrice && order.getOrderType().equals(((OrderTypeService) serviceFactory.getService(ApplicationConstants. REF_ORDER_TYPE_SERVICE)).getOrderTypeById(ApplicationConstants.ORDER_TYPE_LIMIT)))
+					|| order.getOrderType().equals(((OrderTypeService) serviceFactory.getService(ApplicationConstants. REF_ORDER_TYPE_SERVICE)).getOrderTypeById(ApplicationConstants.ORDER_TYPE_MARKET))) {
 				validOrders.add(order);
 			}
 		});
@@ -258,12 +243,12 @@ public class OrderServiceImpl implements OrderService {
 	@Override
 	public Order createDefaultOrder() {
 		Order order = new Order();
-		order.setCreatedBy(userService.getUserName());
+		order.setCreatedBy(((UserService) serviceFactory.getService(ApplicationConstants.USER_SERVICE)).getUserName());
 		order.setCreatedOn(new Date());
 		order.setExecutionQuantity(0f);
 		order.setOrderprice(0f);
 		order.setOrderQuantity(0);
-		order.setOrderType(orderTypeService.getOrderTypeById(ApplicationConstants.ORDER_TYPE_LIMIT));
+		order.setOrderType(((OrderTypeService) serviceFactory.getService(ApplicationConstants. REF_ORDER_TYPE_SERVICE)).getOrderTypeById(ApplicationConstants.ORDER_TYPE_LIMIT));
 		return order;
 	}
 

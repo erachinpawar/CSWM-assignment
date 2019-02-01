@@ -9,7 +9,7 @@ import com.practice.cs_wm.model.OrderBook;
 
 @Service
 @Transactional
-public interface ExecutionService {
+public interface ExecutionService extends AbstractService{
 	
 	public Execution getExecution();
 
